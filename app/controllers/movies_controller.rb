@@ -11,7 +11,18 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    session.delete(:ratings_filter) if params[:ratings].nil? && params[:commit]
+    @sort_by = params[:sort_by] || session[:sort_by]
+    @all_ratings = Movie.all_ratings #['G','PG','PG-13','R']
+    @ratings_filter = params[:ratings] || session[:ratings_filter]
+    session[:ratings_filter] = @ratings_filter
+    session[:sort_by] = @sort_by
+    if @ratings_filter.nil? then
+      @movies = Movie.all
+    else
+      @movies=Movie.where(rating: @ratings_filter.keys)
+    end
+    @movies = @movies.order(@sort_by)
   end
 
   def new
